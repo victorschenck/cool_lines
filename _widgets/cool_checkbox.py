@@ -1,20 +1,42 @@
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
+# -*- coding: utf-8 -*-
+"""
+Cool Lines! — Maya 2022+ PySide6/PySide2 UI and Line Painting Tool
+
+----------
+
+version 1.00    --/--/----
+
+Author: Victor Schenck
+Email: -
+Created: 2025
+
+----------
+
+version 1.01    12/30/2025
+
+Description : Updating script to handle Pyside6 compat, Maya (2025+)
+
+Contributor: Clement Daures
+Company: The Rigging Atlas
+Email: theriggingatlas@proton.me
+"""
+from ui.pyside_compat import (
+    QtWidgets, QtCore, QtGui,
+)
 
 
-class CoolCheckbox(QCheckBox):
+class CoolCheckbox(QtWidgets.QCheckBox):
     def __init__(self, *args, **kwargs):
-        QCheckBox.__init__(self, *args, **kwargs)
+        QtWidgets.QCheckBox.__init__(self, *args, **kwargs)
 
         self._circle_position_x = 3
-        self._background_color = QColor(255,0,0)
+        self._background_color = QtGui.QColor(255,0,0)
         #Creating ellipse animation:
-        self.ellipse_animation = QPropertyAnimation(self, b"circle_position")
+        self.ellipse_animation = QtCore.QPropertyAnimation(self, b"circle_position")
 
 
         #Creating color animation:
-        self.background_color_animation = QPropertyAnimation(self, b"background_color")
+        self.background_color_animation = QtCore.QPropertyAnimation(self, b"background_color")
 
 
         self.stateChanged.connect(self.toggleCheckbox)
@@ -27,7 +49,7 @@ class CoolCheckbox(QCheckBox):
 
 
     #Create new circle position property:
-    @Property(float) #Getter
+    @QtCore.Property(float) #Getter
     def circle_position(self):
         return self._circle_position_x
     
@@ -38,7 +60,7 @@ class CoolCheckbox(QCheckBox):
 
 
     #Create new background color property:
-    @Property(QColor) #Getter
+    @QtCore.Property(QtGui.QColor) #Getter
     def background_color(self):
         return self._background_color
     
@@ -51,11 +73,11 @@ class CoolCheckbox(QCheckBox):
 
     def setupAnimations(self, start_checked = False,
                         animation_duration = 200,
-                        animation_curve = QEasingCurve.OutQuart,
+                        animation_curve = QtCore.QEasingCurve.OutQuart,
                         circle_height_border = 15,
                         circle_pos_y = 3,
-                        checked_color = QColor(0,255,0),
-                        unchecked_color = QColor(255,0,0) ):
+                        checked_color = QtGui.QColor(0,255,0),
+                        unchecked_color = QtGui.QColor(255,0,0) ):
         
         self.animation_duration = animation_duration
         self.ellipse_animation.setDuration(animation_duration)
@@ -80,25 +102,25 @@ class CoolCheckbox(QCheckBox):
 
         '''super().paintEvent(event)'''
 
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        pen = QPen()
-        pen.setColor(QColor(0,0,0,0))
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+        pen = QtGui.QPen()
+        pen.setColor(QtGui.QColor(0,0,0,0))
         painter.setPen(pen)
 
         
         
         #Draw Checkbox background
-        rect = QRect(0,0, self.width(), self.height())
+        rect = QtCore.QRect(0,0, self.width(), self.height())
         painter.setBrush(self._background_color)
         painter.drawRoundedRect(0,0, rect.width(), self.height(), (self.height()/2), (self.height()/2))
 
         
 
-        painter.setBrush(QColor(255,255,255))
+        painter.setBrush(QtGui.QColor(255,255,255))
         #Calculating the height of the circle:
         self.circle_height = (self.height() - (self.circle_position_y*2))
-        painter.drawEllipse(QRectF(self._circle_position_x, self.circle_position_y, self.circle_height, self.circle_height))
+        painter.drawEllipse(QtCore.QRectF(self._circle_position_x, self.circle_position_y, self.circle_height, self.circle_height))
 
 
 
@@ -107,7 +129,7 @@ class CoolCheckbox(QCheckBox):
 
 
     #Set new hitbox:
-    def hitButton(self, pos: QPoint):
+    def hitButton(self, pos: QtCore.QPoint):
         return self.contentsRect().contains(pos)
     
     def startTransition(self):

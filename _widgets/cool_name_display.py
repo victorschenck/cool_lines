@@ -1,26 +1,49 @@
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
+# -*- coding: utf-8 -*-
+"""
+Cool Lines! — Maya 2022+ PySide6/PySide2 UI and Line Painting Tool
+
+----------
+
+version 1.00    --/--/----
+
+Author: Victor Schenck
+Email: -
+Created: 2025
+
+----------
+
+version 1.01    12/30/2025
+
+Description : Updating script to handle Pyside6 compat, Maya (2025+)
+
+Contributor: Clement Daures
+Company: The Rigging Atlas
+Email: theriggingatlas@proton.me
+"""
+from ui.pyside_compat import (
+    QtWidgets, QtCore, QtGui,
+)
 
 
-class CoolNameDisplay(QWidget):
 
-    name_changed= Signal(str)
+class CoolNameDisplay(QtWidgets.QWidget):
+
+    name_changed= QtCore.Signal(str)
 
     def __init__(self, line_data, *args, **kwargs):
-        QWidget.__init__(self, *args, **kwargs)
+        QtWidgets.QWidget.__init__(self, *args, **kwargs)
 
 
         self.line_data= line_data
         
-        self.main_layout= QStackedLayout()
+        self.main_layout= QtWidgets.QStackedLayout()
         self.setLayout(self.main_layout)
 
 
-        self.name_label= QLabel(self)
+        self.name_label= QtWidgets.QLabel(self)
         self.name_label.setText(self.line_data["name"])
 
-        self.name_lineedit= QLineEdit(self)
+        self.name_lineedit= QtWidgets.QLineEdit(self)
         self.name_lineedit.hide()
 
         self.main_layout.addWidget(self.name_label)
@@ -35,7 +58,7 @@ class CoolNameDisplay(QWidget):
 
 
     def mouseDoubleClickEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == QtCore.Qt.LeftButton:
             self.switchMode()
 
 

@@ -1,1 +1,39 @@
-./older
+# potential log files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store # macOS
+Thumbs.db # Windows
+desktop.ini # Windows
+
+# build/compilation
+/build/
+/dist/
+/target/
+*.pyc
+
+### Python ###
+__pycache__/
+venv/
+.venv/
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+.coverage
+
+
+# VS Code
+.vscode/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# PyCharm/IntelliJ
+.idea/
+
+*.mel.lock
+*.py.lock
+*.mtf

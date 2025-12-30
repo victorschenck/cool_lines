@@ -1,20 +1,42 @@
-import sys
-import pprint
-sys.path.append("INSTALLATION_PATH_REPLACE_STRING")
+# -*- coding: utf-8 -*-
+"""
+Cool Lines! — Maya 2022+ PySide6/PySide2 UI and Line Painting Tool
 
+----------
+
+version 1.00    --/--/----
+
+Author: Victor Schenck
+Email: -
+Created: 2025
+
+----------
+
+version 1.01    12/30/2025
+
+Description : Updating script to handle Pyside6 compat, Maya (2025+)
+
+Contributor: Clement Daures
+Company: The Rigging Atlas
+Email: theriggingatlas@proton.me
+"""
+
+import sys
+sys.path.append("INSTALLATION_PATH_REPLACE_STRING")
 from importlib import reload
 from pathlib import Path
 
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-
-import shiboken2
-
 from maya import cmds, mel
-import maya.OpenMayaUI as omui
-
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+
+from ui.pyside_compat import (
+    QtWidgets, QtCore, QtGui,
+    QRegExp,
+    QRegExpValidator,
+    QAction,
+    get_maya_main_window,
+)
+
 
 import scene_data
 reload(scene_data)
@@ -27,11 +49,6 @@ reload(cool_img_button)
 from _widgets.cool_checkbox import CoolCheckbox
 from _widgets.cool_name_display import CoolNameDisplay
 from _widgets.cool_img_button import CoolImgButton
-
-        
-def mayaMainWindow():
-    MainWindowPointer = omui.MQtUtil.mainWindow()
-    return shiboken2.wrapInstance(int(MainWindowPointer), QWidget)
 
 
 orange_theme= """
@@ -176,32 +193,32 @@ def detectOrCreateShader():
     return cool_lines_shader
 
 
-class DockableWindow(MayaQWidgetDockableMixin, QDialog):
-    def __init__(self, parent=mayaMainWindow()): 
+class DockableWindow(MayaQWidgetDockableMixin, QtWidgets.QDialog):
+    def __init__(self, parent=get_maya_main_window()):
         super(DockableWindow, self).__init__(parent)
 
         self.setGeometry(200,200,200,600)
 
         #Making the window appear on top:
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowTitle('Cool Lines!')
         
         #Creating the tab widget:
         self.main_widget = mainWidget()
-        self.main_layout = QVBoxLayout()
+        self.main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_layout)
         self.main_layout.addWidget(self.main_widget)
 
         #Adding menu bar:
         #Creating the Tool Bar:
-        menu_bar = QMenuBar(self)
+        menu_bar = QtWidgets.QMenuBar(self)
         self.main_layout.setMenuBar(menu_bar)
         file_menu = menu_bar.addMenu("File")
         bake_menu = menu_bar.addMenu("Bake")
         
         refresh_file_action = QAction("Manual Refesh", self)
         refresh_file_action.triggered.connect(self.fileChange)
-        refresh_file_action.setShortcut(QKeySequence("Alt+R"))
+        refresh_file_action.setShortcut(QtGui.QKeySequence("Alt+R"))
         file_menu.addAction(refresh_file_action)
 
         bake_line_action = QAction("Bake All Lines", self)
@@ -210,7 +227,7 @@ class DockableWindow(MayaQWidgetDockableMixin, QDialog):
 
         self.setStyleSheet(orange_theme)
 
-    def closeEvent(self, event: QCloseEvent):
+    def closeEvent(self, event: QtGui.QCloseEvent):
         print(f"Clearing scene event catcher: {scene_event_catcher_num}")
         cmds.scriptJob(kill=scene_event_catcher_num, force=True)
         event.accept()
@@ -227,46 +244,46 @@ class DockableWindow(MayaQWidgetDockableMixin, QDialog):
 
 
 
-class mainWidget(QWidget):
+class mainWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
-        QWidget.__init__(self, *args, **kwargs)
+        QtWidgets.QWidget.__init__(self, *args, **kwargs)
 
         #Main Layout:
-        self.main_layout = QVBoxLayout()
+        self.main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.main_layout)
 
         self.setStyleSheet('''font: 75 13pt "Microsoft YaHei UI";''')
 
         #####################################
         #Creation
-        self.target_mesh_label = QLabel(self)
+        self.target_mesh_label = QtWidgets.QLabel(self)
         self.target_mesh_label.setText('Target Mesh')
         
-        self.set_target_mesh_hlayout = QHBoxLayout()
+        self.set_target_mesh_hlayout = QtWidgets.QHBoxLayout()
 
-        self.set_target_mesh_lineedit = QLineEdit(self)
-        self.set_target_mesh_button = QPushButton(self)
+        self.set_target_mesh_lineedit = QtWidgets.QLineEdit(self)
+        self.set_target_mesh_button = QtWidgets.QPushButton(self)
         self.set_target_mesh_button.setText('Set !')
 
         self.set_target_mesh_hlayout.addWidget(self.set_target_mesh_lineedit)
         self.set_target_mesh_hlayout.addWidget(self.set_target_mesh_button)
 
 
-        self.paint_options_buttons_hlayout= QHBoxLayout()
+        self.paint_options_buttons_hlayout= QtWidgets.QHBoxLayout()
 
         brush_icon_path= Path(scene_data.__file__).parent / './_icons/brush_icon.png'
-        self.create_paint_line_button= CoolImgButton(img_path=brush_icon_path.as_posix(), btn_size= QSize(80, 80), img_size=QSize(70,70),
-                                          bg_color= QColor("#CD6C1B"))
+        self.create_paint_line_button= CoolImgButton(img_path=brush_icon_path.as_posix(), btn_size= QtCore.QSize(80, 80), img_size=QtCore.QSize(70,70),
+                                          bg_color= QtGui.QColor("#CD6C1B"))
         self.create_paint_line_button.setToolTip("Draw a line on the target mesh !")
         
         edge_line_icon_path= Path(scene_data.__file__).parent / './_icons/edge_line_icon.png'
-        self.create_edge_line_button= CoolImgButton(img_path=edge_line_icon_path.as_posix(), btn_size= QSize(80, 80), img_size=QSize(70,70),
-                                          bg_color= QColor("#CD6C1B"))
+        self.create_edge_line_button= CoolImgButton(img_path=edge_line_icon_path.as_posix(), btn_size= QtCore.QSize(80, 80), img_size=QtCore.QSize(70,70),
+                                          bg_color= QtGui.QColor("#CD6C1B"))
         self.create_edge_line_button.setToolTip("Use an edge of the target mesh to generate a line !")
         
         paint_bucket_icon_path= Path(scene_data.__file__).parent / './_icons/paint_bucket_icon.png'
-        self.assign_shader_button= CoolImgButton(img_path=paint_bucket_icon_path.as_posix(), btn_size= QSize(80, 80), img_size=QSize(70,70),
-                                          bg_color= QColor("#CD6C1B"))
+        self.assign_shader_button= CoolImgButton(img_path=paint_bucket_icon_path.as_posix(), btn_size= QtCore.QSize(80, 80), img_size=QtCore.QSize(70,70),
+                                          bg_color= QtGui.QColor("#CD6C1B"))
         self.assign_shader_button.setToolTip("Assign default line shader to selected strokes !")
         
         self.paint_options_buttons_hlayout.addStretch()
@@ -276,42 +293,42 @@ class mainWidget(QWidget):
         self.paint_options_buttons_hlayout.addStretch()
 
 
-        self.default_scale_title_label= QLabel(self)
+        self.default_scale_title_label= QtWidgets.QLabel(self)
         self.default_scale_title_label.setText("Default Scale")
 
 
-        self.default_scale_lineedit = QLineEdit(self)
+        self.default_scale_lineedit = QtWidgets.QLineEdit(self)
         validator = QRegExpValidator(QRegExp(r'[0-9]+.[0-9][0-9][0-9][0-9]'))
         self.default_scale_lineedit.setValidator(validator)
         self.default_scale_lineedit.setText('0.100')
 
-        self.subdived_target_offset_label= QLabel(self)
+        self.subdived_target_offset_label= QtWidgets.QLabel(self)
         self.subdived_target_offset_label.setText("Subdiv Offset")
         self.subdived_target_offset_label.setToolTip("When drawing on subdived mesh, the line clips inside. You can adjust it here.")
 
-        self.subdived_target_offset_lineedit = QLineEdit(self)
+        self.subdived_target_offset_lineedit = QtWidgets.QLineEdit(self)
         validator = QRegExpValidator(QRegExp(r'[0-9]+.[0-9][0-9][0-9][0-9]'))
         self.subdived_target_offset_lineedit.setValidator(validator)
         self.subdived_target_offset_lineedit.setText('0.1')
 
-        self.line_resolution_label= QLabel(self)
+        self.line_resolution_label= QtWidgets.QLabel(self)
         self.line_resolution_label.setText("Line Resolution")
         self.line_resolution_label.setToolTip("1 is full accuracy (too much). Default is 5. The more you add, the lower the resolution gets.")
 
-        self.line_resolution_lineedit = QLineEdit(self)
+        self.line_resolution_lineedit = QtWidgets.QLineEdit(self)
         validator = QRegExpValidator(QRegExp(r'[0-9][0-9][0-9][0-9][0-9]'))
         self.line_resolution_lineedit.setValidator(validator)
         self.line_resolution_lineedit.setText('5')
 
-        self.scene_content_label= QLabel(self)
+        self.scene_content_label= QtWidgets.QLabel(self)
         self.scene_content_label.setText("Scene Content")
 
-        self.lines_list_widget = QListWidget(self)
-        self.lines_list_widget.setFocusPolicy(Qt.NoFocus)
-        self.lines_list_widget.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.lines_list_widget = QtWidgets.QListWidget(self)
+        self.lines_list_widget.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.lines_list_widget.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.lines_list_widget.viewport().installEventFilter(self)
 
-        self.credits_label= QLabel(self)
+        self.credits_label= QtWidgets.QLabel(self)
         self.credits_label.setText("Credits (Hover)")
         self.credits_label.setToolTip("Dev: Victor Schenck / Sources: Beranger Roussel's website / Icons: icons8.com")
         self.credits_label.setStyleSheet("""font: 75 8pt "Microsoft YaHei UI";""")
@@ -365,7 +382,7 @@ class mainWidget(QWidget):
 
     def eventFilter(self, source, event):
         # Deselect item when nothing clicked
-        if source == self.lines_list_widget.viewport() and event.type() == QEvent.MouseButtonPress:
+        if source == self.lines_list_widget.viewport() and event.type() == QtCore.QEvent.MouseButtonPress:
             
             item = self.lines_list_widget.itemAt(event.pos())
             if not item:
@@ -390,8 +407,8 @@ class mainWidget(QWidget):
             current_line_data= dict(global_scene_data[current_line_name])
 
             # UI
-            current_line_item = QListWidgetItem()
-            current_line_item.setData(Qt.UserRole, current_line_data)
+            current_line_item = QtWidgets.QListWidgetItem()
+            current_line_item.setData(QtCore.Qt.UserRole, current_line_data)
 
             current_line_item_widget = lineListDisplayWidget(current_line_data, current_line_item)
             current_line_item.setSizeHint(current_line_item_widget.sizeHint())
@@ -441,7 +458,7 @@ class mainWidget(QWidget):
 
     def selectLineInMaya(self, item):
 
-        line_data= item.data(Qt.UserRole)
+        line_data= item.data(QtCore.Qt.UserRole)
 
         # Showing the "Selected !" Message on the selecteds mesh node
         cmds.headsUpMessage( 'Selected !', object= line_data["mesh"] )
@@ -452,7 +469,7 @@ class mainWidget(QWidget):
         user_selection= cmds.ls(sl=True)[0]
 
         if "|" in user_selection: # Means obj is not unique !!!
-            QMessageBox.warning(self, "Can't paint :(", "This object's name is not unique !")
+            QtWidgets.QMessageBox.warning(self, "Can't paint :(", "This object's name is not unique !")
             return
         
         global paint_on_mesh
@@ -469,21 +486,21 @@ class mainWidget(QWidget):
         user_selection= cmds.ls(sl=True)
 
         if not user_selection:
-            QMessageBox.warning(self, "Can't paint :(", "Please select edges of the target mesh !")
+            QtWidgets.QMessageBox.warning(self, "Can't paint :(", "Please select edges of the target mesh !")
             return
 
         if not paint_on_mesh:
-            QMessageBox.warning(self, "Can't paint :(", "Please provide a target mesh !")
+            QtWidgets.QMessageBox.warning(self, "Can't paint :(", "Please provide a target mesh !")
             return
 
         if '.' in paint_on_mesh:
-            QMessageBox.warning(self, "Can't paint :(", "Please provide a valid target mesh, not a component !")
+            QtWidgets.QMessageBox.warning(self, "Can't paint :(", "Please provide a valid target mesh, not a component !")
             return
 
         if paint_on_mesh in user_selection[0]:
             pass
         else:
-            QMessageBox.warning(self, "Can't paint :(", "The line you selected is not on the target mesh !")
+            QtWidgets.QMessageBox.warning(self, "Can't paint :(", "The line you selected is not on the target mesh !")
             return
 
         stroke_id= len(list(global_scene_data_obj.getGlobalLinesData().keys()))
@@ -569,7 +586,7 @@ class mainWidget(QWidget):
 
         global paint_on_mesh
         if not paint_on_mesh:
-            QMessageBox.warning(self, "Can't paint :(", "Please set a target mesh to paint on it !")
+            QtWidgets.QMessageBox.warning(self, "Can't paint :(", "Please set a target mesh to paint on it !")
             return
 
         cmds.select(paint_on_mesh)
@@ -610,28 +627,28 @@ class mainWidget(QWidget):
                     continue
         
         if not maya_selection:
-            cmds.select(self.lines_list_widget.currentItem().data(Qt.UserRole)["mesh"])
+            cmds.select(self.lines_list_widget.currentItem().data(QtCore.Qt.UserRole)["mesh"])
 
         cmds.hyperShade(assign= detectOrCreateShader())
 
 
-class lineListDisplayWidget(QWidget):
-    delete_line_item= Signal(QWidget)
+class lineListDisplayWidget(QtWidgets.QWidget):
+    delete_line_item= QtCore.Signal(QtWidgets.QWidget)
 
-    def __init__(self, line_data :dict, list_item :QListWidgetItem, *args,**kwargs):
-        QWidget.__init__(self,*args,**kwargs)
+    def __init__(self, line_data :dict, list_item :QtWidgets.QListWidgetItem, *args,**kwargs):
+        QtWidgets.QWidget.__init__(self,*args,**kwargs)
 
         self.line_data= line_data
         self.list_item= list_item
 
-        self.main_layout = QHBoxLayout()
-        self.main_layout.setSizeConstraint(QLayout.SetFixedSize) #Mandatory to scale correctly the widget
+        self.main_layout = QtWidgets.QHBoxLayout()
+        self.main_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize) #Mandatory to scale correctly the widget
         self.setLayout(self.main_layout)
 
         
         self.line_name_widget= CoolNameDisplay(line_data)
 
-        self.line_type_label= QLabel(self)
+        self.line_type_label= QtWidgets.QLabel(self)
         self.line_type_label.setText(self.line_data["type"])
         self.line_type_label.setStyleSheet('''font: 75 7pt "Microsoft YaHei UI";''')
 
@@ -640,14 +657,14 @@ class lineListDisplayWidget(QWidget):
         current_line_grp_vis= bool(current_line_grp_vis)
         
         self.disable_line_checkbox= CoolCheckbox(self)
-        self.disable_line_checkbox.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Minimum)
+        self.disable_line_checkbox.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.disable_line_checkbox.setMinimumSize(30,15)
         self.disable_line_checkbox.setMaximumSize(30,15)
-        self.disable_line_checkbox.setupAnimations(animation_curve=QEasingCurve.OutBounce, animation_duration=300, start_checked= current_line_grp_vis)
+        self.disable_line_checkbox.setupAnimations(animation_curve=QtCore.QEasingCurve.OutBounce, animation_duration=300, start_checked= current_line_grp_vis)
         
         trash_icon_path= Path(scene_data.__file__).parent / './_icons/trash_icon.png'
-        self.delete_button= CoolImgButton(img_path=trash_icon_path.as_posix(), btn_size= QSize(30, 30), img_size=QSize(20,20),
-                                          bg_color= QColor("#CD6C1B"))
+        self.delete_button= CoolImgButton(img_path=trash_icon_path.as_posix(), btn_size= QtCore.QSize(30, 30), img_size=QtCore.QSize(20,20),
+                                          bg_color= QtGui.QColor("#CD6C1B"))
 
         self.main_layout.addWidget(self.line_name_widget)
         self.main_layout.addStretch()

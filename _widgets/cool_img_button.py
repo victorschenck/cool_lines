@@ -1,16 +1,36 @@
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
+# -*- coding: utf-8 -*-
+"""
+Cool Lines! — Maya 2022+ PySide6/PySide2 UI and Line Painting Tool
 
-from pathlib import Path
+----------
+
+version 1.00    --/--/----
+
+Author: Victor Schenck
+Email: -
+Created: 2025
+
+----------
+
+version 1.01    12/30/2025
+
+Description : Updating script to handle Pyside6 compat, Maya (2025+)
+
+Contributor: Clement Daures
+Company: The Rigging Atlas
+Email: theriggingatlas@proton.me
+"""
+from ui.pyside_compat import (
+    QtWidgets, QtCore, QtGui,
+)
 
 
-class CoolImgButton(QPushButton):
-    def __init__(self, img_path:str, btn_size :QSize, img_size :QSize, bg_color :QColor, corner_radius= 10, *args, **kwargs):
-        QPushButton.__init__(self, *args, **kwargs)
+class CoolImgButton(QtWidgets.QPushButton):
+    def __init__(self, img_path:str, btn_size :QtCore.QSize, img_size :QtCore.QSize, bg_color :QtGui.QColor, corner_radius= 10, *args, **kwargs):
+        QtWidgets.QPushButton.__init__(self, *args, **kwargs)
 
         self.button_size= btn_size
-        self.pixmap= QPixmap(img_path)
+        self.pixmap= QtGui.QPixmap(img_path)
         self.corner_radius= corner_radius
         self.img_size= img_size
         self.bg_color= bg_color
@@ -20,18 +40,17 @@ class CoolImgButton(QPushButton):
         
         btn_rect= event.rect()
                    
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        # painter.setRenderHint(QPainter.SmoothPixmapTransform)
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
 
-        p_path= QPainterPath()
+        p_path= QtGui.QPainterPath()
         p_path.addRoundedRect(btn_rect, self.corner_radius, self.corner_radius)
 
         # Scale img
         scaled_pixmap = self.pixmap.scaled(
         self.img_size, 
-        Qt.KeepAspectRatioByExpanding, 
-        Qt.SmoothTransformation
+        QtCore.Qt.KeepAspectRatioByExpanding,
+        QtCore.Qt.SmoothTransformation
         )
     
         # Center img

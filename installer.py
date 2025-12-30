@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+Cool Lines! — Installer
+
+----------
+
+version 1.00    --/--/----
+
+Author: Victor Schenck
+Email: -
+Created: 2025
+"""
 from pathlib import Path
 from maya import cmds
 
