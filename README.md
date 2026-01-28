@@ -2,6 +2,10 @@
 Author: Victor Schenck  
 Contributor: Clement Daures
 
+This tool is for Non-Commercial use only.
+Contact the author for commercial use : schenck.victorcontact@gmail.com
+
+
 ---
 
 Version: 1.0.5  
